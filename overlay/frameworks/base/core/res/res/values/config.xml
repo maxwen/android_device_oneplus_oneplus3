@@ -81,7 +81,7 @@
     </integer-array>
 
     <!-- Boolean indicating whether we want button brightness support -->
-    <bool name="config_button_brightness_support">true</bool>
+    <!--<bool name="config_button_brightness_support">true</bool>-->
 
     <!-- Minimum screen brightness setting allowed by the power manager.
          The user is forbidden from setting the brightness below this level. -->
@@ -244,7 +244,7 @@
             16 - App switch
          For example, a device with Home, Back and Menu keys would set this
          config to 7. -->
-    <integer name="config_deviceHardwareKeys">7</integer>
+    <!--<integer name="config_deviceHardwareKeys">7</integer>-->
 
     <!-- Disable lockscreen translucent decor by default -->
     <bool name="config_enableLockScreenTranslucentDecor">true</bool>
@@ -261,12 +261,12 @@
 
     <!-- The list absolute paths of jar/apk files containing the device specific handlers,
         delimited by File.pathSeparator, which defaults to ":" on Android -->
-    <string name="config_deviceKeyHandlerLib" translatable="false">/system/app/Oneplus3Parts/Oneplus3Parts.apk</string>
+    <!--<string name="config_deviceKeyHandlerLib" translatable="false">/system/app/Oneplus3Parts/Oneplus3Parts.apk</string>-->
     <!-- Full qualified name of the class that implements
         com.android.internal.os.DeviceKeyHandler interface. -->
-    <string name="config_deviceKeyHandlerClass" translatable="false">org.omnirom.device.KeyHandler</string>
+    <!--<string name="config_deviceKeyHandlerClass" translatable="false">org.omnirom.device.KeyHandler</string>-->
 
-    <bool name="config_powerProfilesSupported">true</bool>
+    <!--<bool name="config_powerProfilesSupported">true</bool>-->
 
     <!-- Whether Multiuser UI should be shown -->
     <bool name="config_enableMultiUserUI">true</bool>
@@ -312,7 +312,7 @@
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
-    <integer name="config_longPressOnMenuBehavior">1</integer>
+    <!--<integer name="config_longPressOnMenuBehavior">1</integer>-->
 
     <!-- Flag indicating if device supports EAP SIM, AKA, AKA' -->
     <bool name="config_eap_sim_based_auth_supported">false</bool>

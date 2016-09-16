@@ -48,7 +48,7 @@ TARGET_USES_64_BIT_BINDER := true
 
 ENABLE_CPUSETS := true
 
-BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.selinux=enforcing user_debug=31 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 cma=32M@0-0xffffffff androidboot.bootdevice=624000.ufshc
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.selinux=permissive user_debug=31 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 cma=32M@0-0xffffffff androidboot.bootdevice=624000.ufshc
 BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_TAGS_OFFSET := 0x02000000
@@ -73,7 +73,7 @@ TARGET_SPECIFIC_HEADER_PATH := $(BOARD_PATH)/include
 BOARD_USES_QCOM_HARDWARE := true
 TARGET_USES_QCOM_BSP := true
 TARGET_USERIMAGES_USE_EXT4 := true
-COMMON_GLOBAL_CFLAGS += -DSNDRV_COMPRESS_SET_NEXT_TRACK_PARAM
+TARGET_GLOBAL_CFLAGS += -DSNDRV_COMPRESS_SET_NEXT_TRACK_PARAM
 
 # Display
 TARGET_QCOM_DISPLAY_VARIANT := caf-msm8996
@@ -154,8 +154,8 @@ BOARD_CHARGER_DISABLE_INIT_BLANK := true
 TARGET_PROVIDES_POWERHAL := true
 
 # ril
-TARGET_RIL_VARIANT := caf
-COMMON_GLOBAL_CFLAGS += -DUSE_RIL_VERSION_10
+#TARGET_RIL_VARIANT := caf
+#TARGET_GLOBAL_CFLAGS += -DUSE_RIL_VERSION_10
 
 # libinit
 TARGET_INIT_VENDOR_LIB := libinit_oneplus3
@@ -164,7 +164,7 @@ TARGET_INIT_VENDOR_LIB := libinit_oneplus3
 TARGET_PROVIDES_LIBLIGHT := true
 
 # Sensors
-COMMON_GLOBAL_CFLAGS += -DBOARD_HAS_SENSORS_GROUP
+TARGET_GLOBAL_CFLAGS += -DBOARD_HAS_SENSORS_GROUP
 
 # NFC
 TARGET_USES_NQ_NFC := true
