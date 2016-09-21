@@ -33,6 +33,7 @@ on early-init
     mkdir /bt_firmware 0771 system system
     symlink /data/tombstones /tombstones
     mkdir /dsp 0771 media media
+    mount debugfs debugfs /sys/kernel/debug
     chmod 0755 /sys/kernel/debug
 
 on init
@@ -66,12 +67,6 @@ on fs
     mount_all fstab.qcom
 
 on boot
-    # Update foreground and background cpusets
-    write /dev/cpuset/foreground/cpus 0-3
-    write /dev/cpuset/foreground/boost/cpus 2-3
-    write /dev/cpuset/background/cpus 0-1
-    write /dev/cpuset/system-background/cpus 0-3
-
     # Secure touch
     chmod 0660 /sys/devices/soc/75ba000.i2c/i2c-12/12-004a/secure_touch_enable
     chmod 0440 /sys/devices/soc/75ba000.i2c/i2c-12/12-004a/secure_touch
@@ -299,6 +294,8 @@ on post-fs-data
     mkdir /persist/data/sfs 0700 system system
     mkdir /persist/data/tz 0700 system system
     mkdir /persist/qc_senseid 0700 system system
+    mkdir /persist/bms 0700 root system
+    restorecon_recursive /persist
     mkdir /data/misc/dts 0770 media audio
     mkdir /data/usf 0700 system system
     mkdir /data/misc/tloc/ 0700 system drmrpc
@@ -425,9 +422,6 @@ on post-fs-data
 
     setprop vold.post_fs_data_done 1
 
-    # Create a folder for SRS to be able to create a usercfg file
-    mkdir /data/data/media 0770 media media
-
     # Create FM dir for patchdownloader
     mkdir /data/misc/fm 0770 system system
     chmod 0770 /data/misc/fm
@@ -535,13 +529,13 @@ service secotad /system/bin/secotad
    user system
    group system
 
-#service thermal-engine /system/vendor/bin/thermal-engine
-#   class main
-#   user root
-#   socket thermal-send-client stream 0666 system system
-#   socket thermal-recv-client stream 0660 system system
-#   socket thermal-recv-passive-client stream 0666 system system
-#   group root
+service thermal-engine /system/vendor/bin/thermal-engine
+   class main
+   user root
+   socket thermal-send-client stream 0666 system system
+   socket thermal-recv-client stream 0660 system system
+   socket thermal-recv-passive-client stream 0666 system system
+   group root
 
 service time_daemon /system/bin/time_daemon
    class late_start
@@ -658,11 +652,14 @@ service mdtpd /system/vendor/bin/mdtpd
     user root
     group system radio drmrpc
 
-on charger
-    write /sys/devices/system/cpu/cpu2/online 0
-    write /sys/devices/system/cpu/cpu3/online 0
-    write /sys/module/lpm_levels/parameters/sleep_disabled 0
-    start dashd
+service dashd /sbin/dashd
+    class core
+    critical
+    seclabel u:r:dashd:s0
+    group root system
+
+on property:init.svc.healthd=restarting
+    restart dashd
 
 service iop /system/bin/iop
     class main
@@ -700,10 +697,10 @@ on property:persist.sys.ssr.enable_ramdumps=0
 
 on property:sys.boot_completed=1
     write /dev/kmsg "Boot completed "
-    # Reset the read_ahead_kb to 512
-    write /sys/block/dm-0/queue/read_ahead_kb 512
-    write /sys/block/sda/queue/read_ahead_kb 512
-    write /sys/block/sde/queue/read_ahead_kb 512
+    # Reset the read_ahead_kb to 256
+    write /sys/block/dm-0/queue/read_ahead_kb 256
+    write /sys/block/sda/queue/read_ahead_kb 256
+    write /sys/block/sde/queue/read_ahead_kb 256
 
     # CPE fw_name used by sound trigger HAL
     chown media audio /sys/kernel/wcd_cpe0/fw_name
@@ -718,9 +715,6 @@ on property:radio.atfwd.start=false
 on property:persist.debug.trace=1
     mkdir /data/core 0777 root root
     write /proc/sys/kernel/core_pattern "/data/core/%E.%p.%e"
-
-on property:init.svc.wpa_supplicant=stopped
-    stop dhcpcd
 
 on property:bluetooth.isEnabled=true
     start btwlancoex
@@ -762,7 +756,7 @@ service dpmd /system/bin/dpmd
     class late_start
     socket dpmd stream 660 root system
 
-service irsc_util /system/bin/irsc_util "/etc/sec_config"
+service irsc_util /system/bin/irsc_util /system/etc/sec_config
     class core
     user root
     oneshot
@@ -979,6 +973,7 @@ service wpa_supplicant /system/bin/wpa_supplicant \
     disabled
     oneshot
 
+# FST Manager can be started by property_set("ctl.start", "fstman:<hostap ctrl iface>");
 service fstman /system/bin/fstman -B -ddd -c /data/misc/wifi/fstman.ini
     user wifi
     group wifi net_admin net_raw
@@ -1153,6 +1148,14 @@ service battery_monitor /system/bin/battery_monitor
     group system
     disabled
 
+service ril-daemon /system/bin/rild
+    class main
+    socket rild stream 660 root radio
+    socket sap_uim_socket1 stream 660 bluetooth bluetooth
+    socket rild-debug stream 660 radio system
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw qcom_diag diag log net_raw
+
 service ril-daemon2 /system/bin/rild -c 2
     class main
     socket rild2 stream 660 root radio
@@ -1292,13 +1295,13 @@ service seemp_healthd /system/vendor/bin/seemp_healthd
     user system
     group system
 
+service ifaadaemon /system/bin/ifaadaemon
+    class late_start
+    user system
+    group system
+
 # hack a shaq
 service netmgrd /system/bin/sh /system/etc/netmgrd_control.sh
    seclabel u:r:netmgrd:s0
    class main
 
-service dashd /sbin/dashd
-    class core
-    critical
-    seclabel u:r:dashd:s0
-    group root system
